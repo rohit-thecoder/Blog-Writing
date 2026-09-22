@@ -688,5 +688,3 @@ LangGraph + Mistral AI + Tavily + Pydantic
 ```
 
 The main goal is to explore how **Agentic AI workflows can combine routing, web research, structured planning, parallel execution, and reduction into a single automated content-generation pipeline.**
-#   B l o g - W r i t i n g  
- 
