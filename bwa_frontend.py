@@ -185,80 +185,487 @@ def extract_title_from_md(md: str, fallback: str) -> str:
     return fallback
 
 
-# -----------------------------
-# Streamlit UI
-# -----------------------------
-st.set_page_config(page_title="LangGraph Blog Writer", layout="wide")
 
-st.title("Blog Writing Agent")
+# -----------------------------
+# Premium Streamlit UI
+# -----------------------------
+st.set_page_config(
+    page_title="Blog Writing | LangGraph Blog Writer",
+    page_icon="✦",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-with st.sidebar:
-    st.header("Generate New Blog")
-    topic = st.text_area(
-        "Topic",
-        height=120,
+# ---------- Premium styling ----------
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+    :root {
+        --bg: #080b12;
+        --panel: #0f1420;
+        --panel-2: #131a28;
+        --border: rgba(255,255,255,.09);
+        --text: #f5f7fb;
+        --muted: #8d98aa;
+        --accent: #8b5cf6;
+        --accent-2: #22d3ee;
+        --success: #34d399;
+    }
+
+    .stApp {
+        background:
+            radial-gradient(circle at 85% 0%, rgba(139,92,246,.12), transparent 28%),
+            radial-gradient(circle at 10% 10%, rgba(34,211,238,.07), transparent 24%),
+            var(--bg);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    [data-testid="stHeader"] {
+        background: transparent;
+    }
+
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0a0e17 0%, #0d121d 100%);
+        border-right: 1px solid var(--border);
+    }
+
+    [data-testid="stSidebar"] > div:first-child {
+        padding-top: 1.2rem;
+    }
+
+    .block-container {
+        max-width: 1480px;
+        padding: 2rem 3rem 4rem;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: 'Space Grotesk', sans-serif !important;
+        letter-spacing: -.025em;
+    }
+
+    .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 2.1rem 2.3rem;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        background:
+            linear-gradient(135deg, rgba(139,92,246,.16), rgba(34,211,238,.05) 50%, rgba(255,255,255,.025)),
+            rgba(15,20,32,.82);
+        box-shadow: 0 24px 80px rgba(0,0,0,.28);
+        margin-bottom: 1.4rem;
+    }
+
+    .hero:after {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        right: -100px;
+        top: -130px;
+        border-radius: 50%;
+        background: rgba(139,92,246,.16);
+        filter: blur(8px);
+    }
+
+    .eyebrow {
+        color: #a78bfa;
+        font-size: .76rem;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        margin-bottom: .65rem;
+    }
+
+    .hero h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        line-height: 1.02;
+        color: #fff;
+    }
+
+    .hero p {
+        max-width: 760px;
+        color: #aeb8c9;
+        font-size: 1rem;
+        line-height: 1.7;
+        margin: .9rem 0 0;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: .8rem;
+        margin: .2rem 0 1.5rem;
+    }
+
+    .brand-mark {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        display: grid;
+        place-items: center;
+        color: white;
+        font-weight: 800;
+        font-family: 'Space Grotesk', sans-serif;
+        background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+        box-shadow: 0 10px 30px rgba(139,92,246,.28);
+    }
+
+    .brand-name {
+        color: #fff;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .brand-sub {
+        color: var(--muted);
+        font-size: .74rem;
+        margin-top: 2px;
+    }
+
+    .section-label {
+        color: #cbd5e1;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: .78rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        margin: 1rem 0 .65rem;
+    }
+
+    .metric-card {
+        min-height: 112px;
+        padding: 1rem 1.15rem;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        background: linear-gradient(145deg, rgba(19,26,40,.95), rgba(12,16,26,.95));
+        box-shadow: 0 12px 35px rgba(0,0,0,.15);
+    }
+
+    .metric-label {
+        color: var(--muted);
+        font-size: .78rem;
+        margin-bottom: .35rem;
+    }
+
+    .metric-value {
+        color: #fff;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.55rem;
+        font-weight: 700;
+    }
+
+    .metric-accent {
+        color: #a78bfa;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 1rem;
+        border: 1px dashed rgba(255,255,255,.12);
+        border-radius: 22px;
+        background: rgba(255,255,255,.018);
+    }
+
+    .empty-icon {
+        font-size: 2rem;
+        margin-bottom: .6rem;
+    }
+
+    .empty-title {
+        color: #fff;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
+    .empty-copy {
+        color: var(--muted);
+        margin-top: .35rem;
+    }
+
+    .result-title {
+        color: #fff;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.55rem;
+        font-weight: 700;
+        margin-bottom: .2rem;
+    }
+
+    .result-meta {
+        color: var(--muted);
+        font-size: .86rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .stTextArea textarea, .stTextInput input {
+        background: rgba(255,255,255,.035) !important;
+        border: 1px solid rgba(255,255,255,.10) !important;
+        border-radius: 13px !important;
+        color: #fff !important;
+    }
+
+    .stTextArea textarea:focus, .stTextInput input:focus {
+        border-color: rgba(139,92,246,.7) !important;
+        box-shadow: 0 0 0 1px rgba(139,92,246,.2) !important;
+    }
+
+    .stButton > button {
+        border-radius: 12px;
+        min-height: 42px;
+        font-weight: 700;
+        border: 1px solid rgba(255,255,255,.10);
+        background: rgba(255,255,255,.045);
+        color: #eef2ff;
+        transition: all .18s ease;
+    }
+
+    .stButton > button:hover {
+        border-color: rgba(139,92,246,.55);
+        background: rgba(139,92,246,.12);
+        transform: translateY(-1px);
+    }
+
+    [data-testid="stBaseButton-primary"] {
+        background: linear-gradient(135deg, #8b5cf6, #6d4aff) !important;
+        border: none !important;
+        box-shadow: 0 10px 28px rgba(124,58,237,.28);
+    }
+
+    [data-testid="stBaseButton-primary"]:hover {
+        box-shadow: 0 14px 35px rgba(124,58,237,.38);
+    }
+
+    .stTabs [data-baseweb="tab-list"] {
+        gap: .35rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        padding: .75rem 1rem;
+        color: #8f9bad;
+        font-weight: 600;
+    }
+
+    .stTabs [aria-selected="true"] {
+        color: #fff !important;
+    }
+
+    .stProgress > div > div {
+        background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+    }
+
+    [data-testid="stDataFrame"] {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .sidebar-note {
+        padding: .85rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 13px;
+        background: rgba(255,255,255,.025);
+        color: #8995a8;
+        font-size: .76rem;
+        line-height: 1.55;
+        margin-top: 1rem;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .35rem .7rem;
+        border-radius: 999px;
+        background: rgba(52,211,153,.08);
+        border: 1px solid rgba(52,211,153,.18);
+        color: #6ee7b7;
+        font-size: .75rem;
+        font-weight: 700;
+    }
+
+    .source-card {
+        padding: 1rem 1.1rem;
+        margin-bottom: .7rem;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: rgba(255,255,255,.025);
+    }
+
+    .source-title {
+        color: #f8fafc;
+        font-weight: 700;
+        margin-bottom: .3rem;
+    }
+
+    .source-meta {
+        color: #7f8a9d;
+        font-size: .75rem;
+    }
+
+    .source-url {
+        color: #a78bfa;
+        font-size: .78rem;
+        overflow-wrap: anywhere;
+    }
+
+    /* Hide Streamlit's default menu/footer for a cleaner app shell */
+    #MainMenu { visibility: hidden; }
+    footer { visibility: hidden; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# ---------- Helpers for UI ----------
+def _as_dict(value: Any) -> Dict[str, Any]:
+    if hasattr(value, "model_dump"):
+        return value.model_dump()
+    if isinstance(value, dict):
+        return value
+    try:
+        return json.loads(json.dumps(value, default=str))
+    except Exception:
+        return {}
+
+
+def metric_card(label: str, value: Any, accent: bool = False):
+    cls = "metric-value metric-accent" if accent else "metric-value"
+    st.markdown(
+        f"""
+        <div class="metric-card">
+            <div class="metric-label">{label}</div>
+            <div class="{cls}">{value}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
-    as_of = st.date_input("As-of date", value=date.today())
-    run_btn = st.button("🚀 Generate Blog", type="primary")
 
-    # ✅ NEW: Past blogs list (keeps everything else intact)
-    st.divider()
-    st.subheader("Past blogs")
+
+def show_empty(icon: str, title: str, copy: str):
+    st.markdown(
+        f"""
+        <div class="empty-state">
+            <div class="empty-icon">{icon}</div>
+            <div class="empty-title">{title}</div>
+            <div class="empty-copy">{copy}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# ---------- Sidebar ----------
+with st.sidebar:
+    st.markdown(
+        """
+        <div class="brand">
+            <div class="brand-mark">✦</div>
+            <div>
+                <div class="brand-name">Blog Writing</div>
+                <div class="brand-sub">LangGraph Blog Writer</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown('<div class="section-label">Create</div>', unsafe_allow_html=True)
+
+    topic = st.text_area(
+        "What should I write about?",
+        height=125,
+        placeholder="e.g. How Self-RAG improves reliability in production RAG systems...",
+        key="topic_input",
+        label_visibility="visible",
+    )
+
+    as_of = st.date_input("Research date", value=date.today())
+
+    run_btn = st.button(
+        "✦  Generate Blog",
+        type="primary",
+        use_container_width=True,
+    )
+
+    st.markdown('<div class="section-label">Library</div>', unsafe_allow_html=True)
 
     past_files = list_past_blogs()
+    selected_md_file = None
+
     if not past_files:
-        st.caption("No saved blogs found (*.md in current folder).")
-        selected_md_file = None
+        st.caption("No saved Markdown blogs in this workspace.")
     else:
-        # Build labels from file name + (optional) parsed title
         options: List[str] = []
         file_by_label: Dict[str, Path] = {}
+
         for p in past_files[:50]:
             try:
                 md_text = read_md_file(p)
                 title = extract_title_from_md(md_text, p.stem)
             except Exception:
                 title = p.stem
+
             label = f"{title}  ·  {p.name}"
             options.append(label)
             file_by_label[label] = p
 
-        selected_label = st.radio(
-            "Select a blog to load",
+        selected_label = st.selectbox(
+            "Saved blogs",
             options=options,
             index=0,
             label_visibility="collapsed",
         )
         selected_md_file = file_by_label.get(selected_label)
 
-        if st.button("📂 Load selected blog"):
+        if st.button("Open selected blog", use_container_width=True):
             if selected_md_file:
                 md_text = read_md_file(selected_md_file)
-                # Load into session_state as if it were a run output
                 st.session_state["last_out"] = {
-                    "plan": None,          # old files don't include plan
-                    "evidence": [],        # old files don't include evidence
-                    "image_specs": [],     # optional (not persisted)
-                    "final": md_text,      # markdown body
+                    "plan": None,
+                    "evidence": [],
+                    "image_specs": [],
+                    "final": md_text,
                 }
-                # also update the topic input to the title (best-effort) without changing UI
-                st.session_state["topic_prefill"] = extract_title_from_md(md_text, selected_md_file.stem)
+                st.rerun()
 
-    
+    st.markdown(
+        """
+        <div class="sidebar-note">
+            <strong>Workflow</strong><br>
+            Describe a topic → LangGraph plans and researches it → review evidence → preview the final Markdown → export.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-# Keep your topic input as-is; optionally prefill for next run after loading a blog
-if "topic_prefill" in st.session_state and isinstance(st.session_state["topic_prefill"], str):
-    # Do not mutate widgets; just keep as a hint.
-    pass
+# ---------- Page header ----------
+st.markdown(
+    """
+    <div class="hero">
+        <div class="eyebrow">AI CONTENT WORKSPACE</div>
+        <h1>Research. Plan. Write.</h1>
+        <p>
+            A premium workspace for generating research-backed blogs with your LangGraph agent.
+            Inspect the plan, evidence, images, execution logs, and final Markdown from one place.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
-# Storage for latest run
+# ---------- State ----------
 if "last_out" not in st.session_state:
     st.session_state["last_out"] = None
 
-# Layout
-tab_plan, tab_evidence, tab_preview, tab_images, tab_logs = st.tabs(
-    ["🧩 Plan", "🔎 Evidence", "📝 Markdown Preview", "🖼️ Images", "🧾 Logs"]
-)
+if "logs" not in st.session_state:
+    st.session_state["logs"] = []
 
 logs: List[str] = []
 
@@ -267,9 +674,10 @@ def log(msg: str):
     logs.append(msg)
 
 
+# ---------- Generation ----------
 if run_btn:
     if not topic.strip():
-        st.warning("Please enter a topic.")
+        st.warning("Enter a topic before generating the blog.")
         st.stop()
 
     inputs: Dict[str, Any] = {
@@ -288,179 +696,276 @@ if run_btn:
         "final": "",
     }
 
-    status = st.status("Running graph…", expanded=True)
+    status = st.status("Building your blog...", expanded=True)
     progress_area = st.empty()
 
     current_state: Dict[str, Any] = {}
     last_node = None
 
-    for kind, payload in try_stream(app, inputs):
-        if kind in ("updates", "values"):
-            node_name = None
-            if isinstance(payload, dict) and len(payload) == 1 and isinstance(next(iter(payload.values())), dict):
-                node_name = next(iter(payload.keys()))
-            if node_name and node_name != last_node:
-                status.write(f"➡️ Node: `{node_name}`")
-                last_node = node_name
+    try:
+        for kind, payload in try_stream(app, inputs):
+            if kind in ("updates", "values"):
+                node_name = None
 
-            current_state = extract_latest_state(current_state, payload)
+                if (
+                    isinstance(payload, dict)
+                    and len(payload) == 1
+                    and isinstance(next(iter(payload.values())), dict)
+                ):
+                    node_name = next(iter(payload.keys()))
 
-            summary = {
-                "mode": current_state.get("mode"),
-                "needs_research": current_state.get("needs_research"),
-                "queries": current_state.get("queries", [])[:5] if isinstance(current_state.get("queries"), list) else [],
-                "evidence_count": len(current_state.get("evidence", []) or []),
-                "tasks": len((current_state.get("plan") or {}).get("tasks", [])) if isinstance(current_state.get("plan"), dict) else None,
-                "images": len(current_state.get("image_specs", []) or []),
-                "sections_done": len(current_state.get("sections", []) or []),
-            }
-            progress_area.json(summary)
+                if node_name and node_name != last_node:
+                    status.write(f"Running `{node_name}`")
+                    last_node = node_name
 
-            log(f"[{kind}] {json.dumps(payload, default=str)[:1200]}")
+                current_state = extract_latest_state(current_state, payload)
 
-        elif kind == "final":
-            out = payload
-            st.session_state["last_out"] = out
-            status.update(label="✅ Done", state="complete", expanded=False)
-            log("[final] received final state")
+                summary = {
+                    "mode": current_state.get("mode"),
+                    "needs_research": current_state.get("needs_research"),
+                    "queries": (
+                        current_state.get("queries", [])[:5]
+                        if isinstance(current_state.get("queries"), list)
+                        else []
+                    ),
+                    "evidence_count": len(current_state.get("evidence", []) or []),
+                    "tasks": (
+                        len((current_state.get("plan") or {}).get("tasks", []))
+                        if isinstance(current_state.get("plan"), dict)
+                        else None
+                    ),
+                    "images": len(current_state.get("image_specs", []) or []),
+                    "sections_done": len(current_state.get("sections", []) or []),
+                }
 
-# Render last result (if any)
+                progress_area.json(summary)
+                log(f"[{kind}] {json.dumps(payload, default=str)[:1200]}")
+
+            elif kind == "final":
+                st.session_state["last_out"] = payload
+                status.update(
+                    label="Generation complete",
+                    state="complete",
+                    expanded=False,
+                )
+                log("[final] received final state")
+
+    except Exception as exc:
+        status.update(label="Generation failed", state="error")
+        st.error(f"Something went wrong while running the graph: {exc}")
+
+    if logs:
+        st.session_state["logs"].extend(logs)
+
+
+# ---------- Results ----------
 out = st.session_state.get("last_out")
-if out:
-    # --- Plan tab ---
-    with tab_plan:
-        st.subheader("Plan")
-        plan_obj = out.get("plan")
-        if not plan_obj:
-            st.info("No plan found in output.")
-        else:
-            if hasattr(plan_obj, "model_dump"):
-                plan_dict = plan_obj.model_dump()
-            elif isinstance(plan_obj, dict):
-                plan_dict = plan_obj
-            else:
-                plan_dict = json.loads(json.dumps(plan_obj, default=str))
 
-            st.write("**Title:**", plan_dict.get("blog_title"))
-            cols = st.columns(3)
-            cols[0].write("**Audience:** " + str(plan_dict.get("audience")))
-            cols[1].write("**Tone:** " + str(plan_dict.get("tone")))
-            cols[2].write("**Blog kind:** " + str(plan_dict.get("blog_kind", "")))
+if not out:
+    show_empty(
+        "✦",
+        "Your workspace is ready",
+        "Enter a topic in the sidebar and generate your first research-backed blog.",
+    )
+    st.stop()
 
-            tasks = plan_dict.get("tasks", [])
-            if tasks:
-                df = pd.DataFrame(
-                    [
-                        {
-                            "id": t.get("id"),
-                            "title": t.get("title"),
-                            "target_words": t.get("target_words"),
-                            "requires_research": t.get("requires_research"),
-                            "requires_citations": t.get("requires_citations"),
-                            "requires_code": t.get("requires_code"),
-                            "tags": ", ".join(t.get("tags") or []),
-                        }
-                        for t in tasks
-                    ]
-                ).sort_values("id")
-                st.dataframe(df, use_container_width=True, hide_index=True)
+plan_dict = _as_dict(out.get("plan"))
+evidence = out.get("evidence") or []
+final_md = out.get("final") or ""
+image_specs = out.get("image_specs") or []
 
-                with st.expander("Task details"):
-                    st.json(tasks)
+# ---------- Result summary ----------
+blog_title = (
+    plan_dict.get("blog_title")
+    or extract_title_from_md(final_md, "Untitled Blog")
+    if final_md
+    else plan_dict.get("blog_title", "Untitled Blog")
+)
 
-    # --- Evidence tab ---
-    with tab_evidence:
-        st.subheader("Evidence")
-        evidence = out.get("evidence") or []
-        if not evidence:
-            st.info("No evidence returned (maybe closed_book mode or no Tavily key/results).")
-        else:
+st.markdown(
+    f"""
+    <div class="result-title">{blog_title}</div>
+    <div class="result-meta">
+        <span class="status-pill">● Ready</span>
+        &nbsp; Generated with LangGraph
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+m1, m2, m3, m4 = st.columns(4)
+with m1:
+    metric_card("Research sources", len(evidence), True)
+with m2:
+    metric_card("Planned tasks", len(plan_dict.get("tasks", []) or []))
+with m3:
+    metric_card("Image assets", len(image_specs))
+with m4:
+    metric_card("Sections", len(out.get("sections") or []))
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+tab_plan, tab_evidence, tab_preview, tab_images, tab_logs = st.tabs(
+    ["✦ Plan", "⌕ Evidence", "◉ Preview", "▧ Images", "≡ Logs"]
+)
+
+# ---------- Plan ----------
+with tab_plan:
+    if not plan_dict:
+        show_empty("◇", "No plan available", "This run did not return a structured plan.")
+    else:
+        top1, top2, top3 = st.columns(3)
+        with top1:
+            st.markdown("**Audience**")
+            st.caption(str(plan_dict.get("audience") or "Not specified"))
+        with top2:
+            st.markdown("**Tone**")
+            st.caption(str(plan_dict.get("tone") or "Not specified"))
+        with top3:
+            st.markdown("**Blog type**")
+            st.caption(str(plan_dict.get("blog_kind") or "Not specified"))
+
+        tasks = plan_dict.get("tasks", []) or []
+
+        if tasks:
+            st.markdown("### Content architecture")
+
             rows = []
-            for e in evidence:
-                if hasattr(e, "model_dump"):
-                    e = e.model_dump()
+            for t in tasks:
+                t = _as_dict(t)
                 rows.append(
                     {
-                        "title": e.get("title"),
-                        "published_at": e.get("published_at"),
-                        "source": e.get("source"),
-                        "url": e.get("url"),
+                        "#": t.get("id"),
+                        "Section": t.get("title"),
+                        "Words": t.get("target_words"),
+                        "Research": "Yes" if t.get("requires_research") else "No",
+                        "Citations": "Yes" if t.get("requires_citations") else "No",
+                        "Code": "Yes" if t.get("requires_code") else "No",
+                        "Tags": ", ".join(t.get("tags") or []),
                     }
                 )
-            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
-    # --- Preview tab ---
-    with tab_preview:
-        st.subheader("Markdown Preview")
-        final_md = out.get("final") or ""
-        if not final_md:
-            st.warning("No final markdown found.")
-        else:
-            render_markdown_with_local_images(final_md)
+            st.dataframe(
+                pd.DataFrame(rows).sort_values("#"),
+                use_container_width=True,
+                hide_index=True,
+            )
 
-            plan_obj = out.get("plan")
-            if hasattr(plan_obj, "blog_title"):
-                blog_title = plan_obj.blog_title
-            elif isinstance(plan_obj, dict):
-                blog_title = plan_obj.get("blog_title", "blog")
-            else:
-                # fallback: parse from markdown title
-                blog_title = extract_title_from_md(final_md, "blog")
+            with st.expander("View raw task details"):
+                st.json(tasks)
 
-            md_filename = f"{safe_slug(blog_title)}.md"
+# ---------- Evidence ----------
+with tab_evidence:
+    if not evidence:
+        show_empty(
+            "⌕",
+            "No research evidence",
+            "No sources were returned for this run. This can happen in closed-book mode or when Tavily returns no results.",
+        )
+    else:
+        st.caption(f"{len(evidence)} sources collected")
+
+        for e in evidence:
+            e = _as_dict(e)
+            title = e.get("title") or "Untitled source"
+            url = e.get("url") or ""
+            published = e.get("published_at") or "Publication date unavailable"
+            source = e.get("source") or "Unknown source"
+
+            st.markdown(
+                f"""
+                <div class="source-card">
+                    <div class="source-title">{title}</div>
+                    <div class="source-meta">{source} · {published}</div>
+                    <div class="source-url">{url}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+# ---------- Preview ----------
+with tab_preview:
+    if not final_md:
+        show_empty("◉", "No Markdown yet", "The graph did not return a final Markdown document.")
+    else:
+        c1, c2 = st.columns([1, 1])
+
+        with c1:
+            st.caption("Rendered article")
+
+        with c2:
             st.download_button(
-                "⬇️ Download Markdown",
+                "Download Markdown",
                 data=final_md.encode("utf-8"),
-                file_name=md_filename,
+                file_name=f"{safe_slug(blog_title)}.md",
                 mime="text/markdown",
+                use_container_width=True,
             )
 
-            bundle = bundle_zip(final_md, md_filename, Path("images"))
-            st.download_button(
-                "📦 Download Bundle (MD + images)",
-                data=bundle,
-                file_name=f"{safe_slug(blog_title)}_bundle.zip",
-                mime="application/zip",
-            )
+        render_markdown_with_local_images(final_md)
 
-    # --- Images tab ---
-    with tab_images:
-        st.subheader("Images")
-        specs = out.get("image_specs") or []
-        images_dir = Path("images")
+        bundle = bundle_zip(
+            final_md,
+            f"{safe_slug(blog_title)}.md",
+            Path("images"),
+        )
 
-        if not specs and not images_dir.exists():
-            st.info("No images generated for this blog.")
-        else:
-            if specs:
-                st.write("**Image plan:**")
-                st.json(specs)
+        st.download_button(
+            "Download bundle · Markdown + images",
+            data=bundle,
+            file_name=f"{safe_slug(blog_title)}_bundle.zip",
+            mime="application/zip",
+            use_container_width=True,
+        )
 
-            if images_dir.exists():
-                files = [p for p in images_dir.iterdir() if p.is_file()]
-                if not files:
-                    st.warning("images/ exists but is empty.")
-                else:
-                    for p in sorted(files):
+# ---------- Images ----------
+with tab_images:
+    images_dir = Path("images")
+
+    if not image_specs and not images_dir.exists():
+        show_empty(
+            "▧",
+            "No image assets",
+            "No image specifications or generated image files were returned.",
+        )
+    else:
+        if image_specs:
+            st.markdown("### Image plan")
+            st.json(image_specs)
+
+        if images_dir.exists():
+            files = [p for p in images_dir.iterdir() if p.is_file()]
+
+            if not files:
+                st.info("The images directory exists but contains no files.")
+            else:
+                cols = st.columns(3)
+
+                for idx, p in enumerate(sorted(files)):
+                    with cols[idx % 3]:
                         st.image(str(p), caption=p.name, use_container_width=True)
 
                 z = images_zip(images_dir)
                 if z:
                     st.download_button(
-                        "⬇️ Download Images (zip)",
+                        "Download all images",
                         data=z,
                         file_name="images.zip",
                         mime="application/zip",
+                        use_container_width=True,
                     )
 
-    # --- Logs tab ---
-    with tab_logs:
-        st.subheader("Logs")
-        if "logs" not in st.session_state:
-            st.session_state["logs"] = []
-        if logs:
-            st.session_state["logs"].extend(logs)
+# ---------- Logs ----------
+with tab_logs:
+    st.caption("Latest execution events")
 
-        st.text_area("Event log", value="\n\n".join(st.session_state["logs"][-80:]), height=520)
-else:
-    st.info("Enter a topic and click **Generate Blog**.")
+    stored_logs = st.session_state.get("logs", [])
+    if not stored_logs:
+        show_empty("≡", "No logs yet", "Execution events will appear here after a generation run.")
+    else:
+        st.text_area(
+            "Event log",
+            value="\n\n".join(stored_logs[-100:]),
+            height=520,
+            label_visibility="collapsed",
+        )

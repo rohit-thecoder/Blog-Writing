@@ -8,11 +8,12 @@ from pathlib import Path
 from typing import TypedDict, List, Optional, Literal, Annotated
 
 from pydantic import BaseModel, Field
+from langchain_mistralai import ChatMistralAI
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Send
 
-from langchain_openai import ChatOpenAI
+
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
 
@@ -113,7 +114,14 @@ class State(TypedDict):
 # -----------------------------
 # 2) LLM
 # -----------------------------
-llm = ChatOpenAI(model="gpt-4.1-mini")
+import os
+
+
+llm = ChatMistralAI(
+    model="codestral-2508",
+    api_key=os.getenv("MISTRAL_API_KEY"),
+    temperature=0
+)
 
 # -----------------------------
 # 3) Router
@@ -161,26 +169,64 @@ def route_next(state: State) -> str:
 # -----------------------------
 # 4) Research (Tavily)
 # -----------------------------
+import os
+import json
+from typing import List
+from langchain_tavily import TavilySearch
+
+
 def _tavily_search(query: str, max_results: int = 5) -> List[dict]:
+
+    # API key available nahi hai to search mat karo
     if not os.getenv("TAVILY_API_KEY"):
         return []
+
     try:
-        from langchain_community.tools.tavily_search import TavilySearchResults  # type: ignore
-        tool = TavilySearchResults(max_results=max_results)
-        results = tool.invoke({"query": query})
+        # Tavily search tool
+        tool = TavilySearch(max_results=max_results)
+
+        # Search execute karo
+        raw_response = tool.invoke({"query": query})
+
+        # Response agar JSON string hai to Python object me convert karo
+        if isinstance(raw_response, str):
+            results = json.loads(raw_response)
+        else:
+            results = raw_response
+
+        # Tavily response usually {"results": [...]} format me aa sakta hai
+        if isinstance(results, dict):
+            results_list = results.get("results", [])
+        elif isinstance(results, list):
+            results_list = results
+        else:
+            results_list = []
+
+        # Normalize results
         out: List[dict] = []
-        for r in results or []:
+
+        for r in results_list:
+
+            if not isinstance(r, dict):
+                continue
+
             out.append(
                 {
                     "title": r.get("title") or "",
                     "url": r.get("url") or "",
                     "snippet": r.get("content") or r.get("snippet") or "",
-                    "published_at": r.get("published_date") or r.get("published_at"),
+                    "published_at": (
+                        r.get("published_date")
+                        or r.get("published_at")
+                    ),
                     "source": r.get("source"),
                 }
             )
+
         return out
-    except Exception:
+
+    except Exception as e:
+        print(f"Tavily search error: {e}")
         return []
 
 def _iso_to_date(s: Optional[str]) -> Optional[date]:
